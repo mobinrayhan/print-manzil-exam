@@ -13,11 +13,23 @@ function formatDate(date) {
   return formattedDate;
 }
 
+let DATA_PER_PAGE = 10;
 const Table = () => {
   const [searchText, setSearchText] = useState("");
+  const [paginate, setPaginate] = useState(1);
   const { data, error, loading } = useFetchData(
-    `https://api.razzakfashion.com/?search=${searchText}`
+    `https://api.razzakfashion.com/?search=${searchText}&paginate=${
+      paginate * DATA_PER_PAGE
+    }`
   );
+
+  function handleNext() {
+    setPaginate((prev) => prev + 1);
+  }
+
+  function handlePrev() {
+    setPaginate((prev) => prev - 1);
+  }
 
   let renderComponent;
   if (loading) {
@@ -55,7 +67,7 @@ const Table = () => {
     <div className="container mx-auto p-4">
       <div className="mb-4">
         <input
-          type="text"
+          type="search"
           className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
           placeholder="Search..."
           value={searchText}
@@ -88,13 +100,21 @@ const Table = () => {
               <tr>
                 <td colSpan="4" className="px-4 py-2 text-right">
                   <span className="mr-4">
-                    Showing 1 - <strong>{data.last_page}</strong> of{" "}
+                    Showing 1 - <strong>{data.per_page}</strong> of{" "}
                     <strong>{data.total}</strong>
                   </span>
-                  <button className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">
+                  <button
+                    className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 disabled:cursor-not-allowed disabled:opacity-70"
+                    disabled={paginate === 1}
+                    onClick={handlePrev}
+                  >
                     Prev
                   </button>
-                  <button className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 ml-5">
+                  <button
+                    className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 ml-5 disabled:cursor-not-allowed disabled:opacity-70"
+                    onClick={handleNext}
+                    disabled={data.per_page === data.total}
+                  >
                     Next
                   </button>
                 </td>
