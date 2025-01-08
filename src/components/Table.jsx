@@ -63,6 +63,13 @@ const Table = () => {
       );
   }
 
+  const currentPage = data?.current_page;
+  const perPage = data?.per_page;
+  const total = data?.total;
+
+  const start = (currentPage - 1) * perPage + 1;
+  const end = Math.min(currentPage * perPage, total);
+
   return (
     <div className="container mx-auto p-4">
       <div className="mb-4">
@@ -100,8 +107,10 @@ const Table = () => {
               <tr>
                 <td colSpan="4" className="px-4 py-2 text-right">
                   <span className="mr-4">
-                    Showing 1 - <strong>{data.per_page}</strong> of{" "}
-                    <strong>{data.total}</strong>
+                    <span className="mr-4">
+                      Showing <strong>{start}</strong> - <strong>{end}</strong>{" "}
+                      of <strong>{total}</strong>
+                    </span>
                   </span>
                   <button
                     className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 disabled:cursor-not-allowed disabled:opacity-70"
