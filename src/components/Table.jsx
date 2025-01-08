@@ -3,23 +3,35 @@ import useFetchData from "../hooks/useFetchData";
 
 function formatDate(date) {
   const options = {
-    weekday: "long", // "Monday"
-    year: "numeric", // "2025"
-    month: "long", // "January"
-    day: "numeric", // "8"
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
   };
 
   const formattedDate = new Date(date).toLocaleDateString("en-US", options);
   return formattedDate;
 }
 
+function generatePaginationOptions(totalItems, step) {
+  const options = [];
+
+  for (let i = step; i <= totalItems; i += step) {
+    options.push(i);
+  }
+
+  return options;
+}
+
 let DATA_PER_PAGE = 10;
 const Table = () => {
   const [searchText, setSearchText] = useState("");
   const [paginate, setPaginate] = useState(1);
+  const [dataPerRow, setDataPerRow] = useState(DATA_PER_PAGE);
+
   const { data, error, loading } = useFetchData(
     `https://api.razzakfashion.com/?search=${searchText}&paginate=${
-      paginate * DATA_PER_PAGE
+      paginate * dataPerRow
     }`
   );
 
@@ -29,6 +41,10 @@ const Table = () => {
 
   function handlePrev() {
     setPaginate((prev) => prev - 1);
+  }
+
+  function handleDataPerRow(value) {
+    setDataPerRow(+value);
   }
 
   let renderComponent;
@@ -106,6 +122,26 @@ const Table = () => {
             <tfoot>
               <tr>
                 <td colSpan="4" className="px-4 py-2 text-right">
+                  <div className="inline-block mr-8">
+                    <p className="inline-block mr-3">Row Per Page</p>
+                    <select
+                      name="perPageData"
+                      id="perPageData"
+                      className="border p-2"
+                      defaultValue={data?.per_page}
+                      onChange={(eve) => handleDataPerRow(eve.target.value)}
+                    >
+                      {generatePaginationOptions(
+                        data?.total,
+                        DATA_PER_PAGE
+                      ).map((data) => (
+                        <option key={data} value={data}>
+                          {data}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
                   <span className="mr-4">
                     <span className="mr-4">
                       Showing <strong>{start}</strong> - <strong>{end}</strong>{" "}
