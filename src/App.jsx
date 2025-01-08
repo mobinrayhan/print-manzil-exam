@@ -7,7 +7,8 @@ function App() {
   const [aspectRatio, setAspectRatio] = useState(1);
   const imageRef = useRef(null);
   const [isResizing, setIsResizing] = useState(false);
-  const [startPosition, setStartPosition] = useState({ x: 0, width: 0 }); // For tracking initial mouse position and width
+  const [startPosition, setStartPosition] = useState({ x: 0, width: 0 });
+  const canvasRef = useRef(null);
 
   function handleSubmit(eve) {
     eve.preventDefault();
@@ -39,30 +40,61 @@ function App() {
     e.preventDefault();
     setStartPosition({
       x: e.clientX,
-      width: resizeData.width, // Store initial width
+      width: resizeData.width,
     });
     setIsResizing(true);
   };
 
   const handleResize = (e) => {
     if (isResizing) {
-      // Calculate the change in mouse position
       const deltaX = e.clientX - startPosition.x;
-
-      // Calculate new width and height based on the aspect ratio
       const newWidth = startPosition.width + deltaX;
       const newHeight = newWidth / aspectRatio;
 
-      // Update resize data
       setResizeData({
-        width: Math.max(50, newWidth), // Ensure a minimum width
-        height: Math.max(50, newHeight), // Ensure a minimum height
+        width: Math.max(50, newWidth),
+        height: Math.max(50, newHeight),
       });
     }
   };
 
   const handleResizeEnd = () => {
     setIsResizing(false);
+  };
+
+  const handleDownload = () => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+
+    canvas.width = 1000;
+    canvas.height = 1000;
+
+    const backgroundImage = new Image();
+    backgroundImage.src = "/men-black-plain-t-shirt-1000x1000.jpg";
+
+    backgroundImage.onload = () => {
+      ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+
+      const img = new Image();
+      img.src = image.src;
+
+      img.onload = () => {
+        ctx.drawImage(
+          img,
+          imageRef.current.offsetLeft,
+          imageRef.current.offsetTop,
+          resizeData.width,
+          resizeData.height
+        );
+
+        const dataUrl = canvas.toDataURL("image/png");
+
+        const link = document.createElement("a");
+        link.href = dataUrl;
+        link.download = "combined-image.png";
+        link.click();
+      };
+    };
   };
 
   useEffect(() => {
@@ -133,6 +165,17 @@ function App() {
           </button>
         </div>
       </form>
+
+      <canvas ref={canvasRef} style={{ display: "none" }} />
+
+      <div className="mt-4">
+        <button
+          className="bg-green-500 text-white p-4 rounded-md"
+          onClick={handleDownload}
+        >
+          Download Combined Image
+        </button>
+      </div>
     </section>
   );
 }
